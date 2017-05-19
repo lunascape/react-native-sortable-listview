@@ -188,11 +188,13 @@ var SortableListView = React.createClass({
   },
   measureWrapper: function() {
     if (this.refs.wrapper) {
-      this.refs.wrapper.measure((frameX, frameY, frameWidth, frameHeight, pageX, pageY) => {
+      setTimeout(() => {
+        this.refs.wrapper.measure((frameX, frameY, frameWidth, frameHeight, pageX, pageY) => {
 
-        let layout = {frameX, frameY, frameWidth, frameHeight, pageX, pageY};
-        this.wrapperLayout = layout;
-      });
+          let layout = {frameX, frameY, frameWidth, frameHeight, pageX, pageY};
+          this.wrapperLayout = layout;
+        });
+      }, 500);
     }
   },
   scrollValue: 0,
