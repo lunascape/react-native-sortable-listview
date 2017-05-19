@@ -138,14 +138,20 @@ var SortableListView = React.createClass({
         let fromIndex = this.order.indexOf(this.state.active.rowData.index);
         let toIndex = this.state.hovering === false ?  fromIndex : Number(this.state.hovering);
         let up = toIndex > fromIndex;
-        if (up) {
-          toIndex--;
-        }
+        // if (up) {
+        //   toIndex--;
+        // }
         if (toIndex === fromIndex) return this.setState({active: false, hovering: false});
+        let key = this.order[toIndex];
         let args = {
-          row: this.state.active.rowData,
-          from: fromIndex,
-          to: toIndex
+          from: {
+            row: this.state.active.rowData.index,
+            index: fromIndex
+          },
+          to: {
+            row: key,
+            index: toIndex
+          }
         };
 
         this.props.onRowMoved && this.props.onRowMoved(args);
