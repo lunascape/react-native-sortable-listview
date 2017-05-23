@@ -269,8 +269,11 @@ var SortableListView = React.createClass({
       i++;
     }
     if (!isLast) i--;
+
+    let key = order[i];
+    const canDrop = this.state.active.rowData.index != key && this.props.canDrop ? this.props.canDrop(this.state.active.rowData.index, key) : true;
     
-    if (i != this.state.hovering && i >= 0) {
+    if (i != this.state.hovering && i >= 0 && canDrop) {
       LayoutAnimation.easeInEaseOut();
       this._previouslyHovering = this.state.hovering;
       this.__activeY = this.panY;
@@ -285,6 +288,7 @@ var SortableListView = React.createClass({
   _rowRefs: {},
   handleRowActive: function(row) {
     if (this.props.disableSorting) return;
+    if (this.props.canDrag && !this.props.canDrag(row.rowData.index)) return;
     this.state.pan.setValue({x: 0, y: 0});
     LayoutAnimation.easeInEaseOut();
     this.moveY = row.layout.pageY;
