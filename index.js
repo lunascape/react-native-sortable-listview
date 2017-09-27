@@ -13,6 +13,52 @@ import {
 let HEIGHT = Dimensions.get('window').height;
 var Row = React.createClass({
   _data: {},
+  getInitialState:function() {
+    this.state = {};
+    this.state.panResponder = PanResponder.create({
+      // Ask to be the responder:
+      onStartShouldSetPanResponder: (evt, gestureState) => true,
+      onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
+      onMoveShouldSetPanResponder: (evt, gestureState) => true,
+      onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
+
+      onPanResponderGrant: (evt, gestureState) => {
+        // The gesture has started. Show visual feedback so the user knows
+        // what is happening!
+
+        // gestureState.d{x,y} will be set to zero now
+        const {locationX, locationY, pageX, pageY, target, timestamp, identifier} = evt.nativeEvent;
+        const nativeEvent = {locationX, locationY, pageX, pageY, target, timestamp, identifier};
+        this.handlerTimerId = setTimeout(() => {
+          this.handleLongPress(nativeEvent);
+        }, 100);
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        // The most recent move distance is gestureState.move{X,Y}
+
+        // The accumulated gesture distance since becoming responder is
+        // gestureState.d{x,y}
+        clearTimeout(this.handlerTimerId);
+      },
+      onPanResponderTerminationRequest: (evt, gestureState) => true,
+      onPanResponderRelease: (evt, gestureState) => {
+        // The user has released all touches while this view is the
+        // responder. This typically means a gesture has succeeded
+        clearTimeout(this.handlerTimerId);
+      },
+      onPanResponderTerminate: (evt, gestureState) => {
+        // Another component has become the responder, so this gesture
+        // should be cancelled
+        clearTimeout(this.handlerTimerId);
+      },
+      onShouldBlockNativeResponder: (evt, gestureState) => {
+        // Returns whether this component should block native components from becoming the JS
+        // responder. Returns true by default. Is currently only supported on android.
+        return true;
+      },
+    });
+    return this.state;
+  },
   shouldComponentUpdate: function(props) {
     if (props.hovering !== this.props.hovering) return true;
     if (props.active !== this.props.active) return true;
@@ -20,12 +66,15 @@ var Row = React.createClass({
     if (props.rowHasChanged) return props.rowHasChanged(props.rowData.data, this._data);
     return false;
   },
-  handleLongPress: function(e) {
+  handleLongPress: function(nativeEvent) {
     this.refs.view.measure((frameX, frameY, frameWidth, frameHeight, pageX, pageY) => {
       let layout = {frameX, frameY, frameWidth, frameHeight, pageX, pageY};
+      if (!this.props.canDrag(frameWidth - nativeEvent.pageX)) {
+        return;
+      }
       this.props.onRowActive({
         layout: layout,
-        touch: e.nativeEvent,
+        touch: nativeEvent,
         rowData: this.props.rowData
       });
     });
@@ -45,13 +94,15 @@ var Row = React.createClass({
 
     let activeIndex = activeData ? activeData.rowData.index : -5;
     let shouldDisplayHovering = activeIndex !== this.props.rowData.index;
-    let Row = React.cloneElement(this.props.renderRow(this.props.rowData.data, this.props.rowData.section, this.props.rowData.index, null, this.props.active), {sortHandlers: {onLongPress: this.handleLongPress, onPressOut: this.props.list.cancel}, onLongPress: this.handleLongPress, onPressOut: this.props.list.cancel});
-    return <View onLayout={this.props.onRowLayout}
-                 style={[ this.props.active && !this.props.hovering ? {height: 0.01}:null,
-                          this.props.active && this.props.hovering ? {opacity: 0.0}: null,]} ref="view">
-          {this.props.hovering && shouldDisplayHovering ? this.props.activeDivider : null}
-          {Row}
-        </View>
+    let Row = React.cloneElement(this.props.renderRow(this.props.rowData.data, this.props.rowData.section, this.props.rowData.index, null, this.props.active), {sortHandlers: {onLongPress: () => {}, onPressOut: this.props.list.cancel}, onLongPress: () => {}, onPressOut: this.props.list.cancel});
+    return <View style={[ this.props.active && !this.props.hovering ? {height: 0.01}:null, this.props.active && this.props.hovering ? {opacity: 0.0}: null,]}
+      ref="view"
+      {...this.state.panResponder.panHandlers}
+      onLayout={this.props.onRowLayout}
+      >
+        {this.props.hovering && shouldDisplayHovering ? this.props.activeDivider : null}
+        {Row}
+    </View>;
   }
 });
 
@@ -229,7 +280,7 @@ var SortableListView = React.createClass({
         newScrollValue = currentScrollValue + (PERCENTAGE_CHANGE * SCROLL_MAX_CHANGE);
         if (newScrollValue > MAX_SCROLL_VALUE) newScrollValue = MAX_SCROLL_VALUE;
       }
-      if (moveY < SCROLL_HIGHER_BOUND && currentScrollValue > NORMAL_SCROLL_MAX 
+      if (moveY < SCROLL_HIGHER_BOUND && currentScrollValue > NORMAL_SCROLL_MAX
           && NORMAL_SCROLL_MAX > 0) {
         let PERCENTAGE_CHANGE = 1 - ((this.listLayout.height - moveY) / SCROLL_LOWER_BOUND);
         pc = PERCENTAGE_CHANGE;
@@ -272,7 +323,7 @@ var SortableListView = React.createClass({
 
     let key = order[i];
     const canDrop = this.state.active.rowData.index != key && this.props.canDrop ? this.props.canDrop(this.state.active.rowData.index, key) : true;
-    
+
     if (i != this.state.hovering && i >= 0 && canDrop) {
       LayoutAnimation.easeInEaseOut();
       this._previouslyHovering = this.state.hovering;
