@@ -13,52 +13,6 @@ import {
 let HEIGHT = Dimensions.get('window').height;
 var Row = React.createClass({
   _data: {},
-  getInitialState:function() {
-    this.state = {};
-    this.state.panResponder = PanResponder.create({
-      // Ask to be the responder:
-      onStartShouldSetPanResponder: (evt, gestureState) => true,
-      onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
-      onMoveShouldSetPanResponder: (evt, gestureState) => true,
-      onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
-
-      onPanResponderGrant: (evt, gestureState) => {
-        // The gesture has started. Show visual feedback so the user knows
-        // what is happening!
-
-        // gestureState.d{x,y} will be set to zero now
-        const {locationX, locationY, pageX, pageY, target, timestamp, identifier} = evt.nativeEvent;
-        const nativeEvent = {locationX, locationY, pageX, pageY, target, timestamp, identifier};
-        this.handlerTimerId = setTimeout(() => {
-          this.handleLongPress(nativeEvent);
-        }, 100);
-      },
-      onPanResponderMove: (evt, gestureState) => {
-        // The most recent move distance is gestureState.move{X,Y}
-
-        // The accumulated gesture distance since becoming responder is
-        // gestureState.d{x,y}
-        clearTimeout(this.handlerTimerId);
-      },
-      onPanResponderTerminationRequest: (evt, gestureState) => true,
-      onPanResponderRelease: (evt, gestureState) => {
-        // The user has released all touches while this view is the
-        // responder. This typically means a gesture has succeeded
-        clearTimeout(this.handlerTimerId);
-      },
-      onPanResponderTerminate: (evt, gestureState) => {
-        // Another component has become the responder, so this gesture
-        // should be cancelled
-        clearTimeout(this.handlerTimerId);
-      },
-      onShouldBlockNativeResponder: (evt, gestureState) => {
-        // Returns whether this component should block native components from becoming the JS
-        // responder. Returns true by default. Is currently only supported on android.
-        return true;
-      },
-    });
-    return this.state;
-  },
   shouldComponentUpdate: function(props) {
     if (props.hovering !== this.props.hovering) return true;
     if (props.active !== this.props.active) return true;
@@ -69,7 +23,7 @@ var Row = React.createClass({
   handleLongPress: function(nativeEvent) {
     this.refs.view.measure((frameX, frameY, frameWidth, frameHeight, pageX, pageY) => {
       let layout = {frameX, frameY, frameWidth, frameHeight, pageX, pageY};
-      if (!this.props.canDrag(frameWidth - nativeEvent.pageX)) {
+      if (this.mouseMoved || !this.props.canDrag(frameWidth - nativeEvent.pageX)) {
         return;
       }
       this.props.onRowActive({
@@ -97,8 +51,17 @@ var Row = React.createClass({
     let Row = React.cloneElement(this.props.renderRow(this.props.rowData.data, this.props.rowData.section, this.props.rowData.index, null, this.props.active), {sortHandlers: {onLongPress: () => {}, onPressOut: this.props.list.cancel}, onLongPress: () => {}, onPressOut: this.props.list.cancel});
     return <View style={[ this.props.active && !this.props.hovering ? {height: 0.01}:null, this.props.active && this.props.hovering ? {opacity: 0.0}: null,]}
       ref="view"
-      {...this.state.panResponder.panHandlers}
       onLayout={this.props.onRowLayout}
+      onTouchStart={evt => {
+        // gestureState.d{x,y} will be set to zero now
+        const {locationX, locationY, pageX, pageY, target, timestamp, identifier} = evt.nativeEvent;
+        const nativeEvent = {locationX, locationY, pageX, pageY, target, timestamp, identifier};
+        this.mouseMoved = false;
+        this.handleLongPress(nativeEvent);
+      }}
+      onTouchMove={e => {
+        this.mouseMoved = true;
+      }}
       >
         {this.props.hovering && shouldDisplayHovering ? this.props.activeDivider : null}
         {Row}
