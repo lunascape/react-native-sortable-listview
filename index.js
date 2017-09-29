@@ -23,7 +23,7 @@ var Row = React.createClass({
   handleLongPress: function(nativeEvent) {
     this.refs.view.measure((frameX, frameY, frameWidth, frameHeight, pageX, pageY) => {
       let layout = {frameX, frameY, frameWidth, frameHeight, pageX, pageY};
-      if (this.mouseMoved || !this.props.canDrag(frameWidth - nativeEvent.pageX)) {
+      if (this.mouseMoved || (this.props.canDrag && !this.props.canDrag(frameWidth - nativeEvent.pageX))) {
         return;
       }
       this.props.onRowActive({
