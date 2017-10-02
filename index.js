@@ -1,5 +1,6 @@
 import React from 'react';
 import TimerMixin from 'react-timer-mixin';
+import createReactClass from 'create-react-class';
 import {
   ListView,
   LayoutAnimation,
@@ -11,7 +12,7 @@ import {
 } from 'react-native';
 
 let HEIGHT = Dimensions.get('window').height;
-var Row = React.createClass({
+var Row = createReactClass({
   _data: {},
   shouldComponentUpdate: function(props) {
     if (props.hovering !== this.props.hovering) return true;
@@ -69,7 +70,7 @@ var Row = React.createClass({
   }
 });
 
-var SortRow = React.createClass({
+var SortRow = createReactClass({
   getInitialState: function() {
     let layout = this.props.list.state.active.layout;
     let wrapperLayout = this.props.list.wrapperLayout;
@@ -97,7 +98,7 @@ var SortRow = React.createClass({
   }
 });
 
-var SortableListView = React.createClass({
+var SortableListView = createReactClass({
   mixins: [TimerMixin],
   mounted: false,
   getInitialState:function() {

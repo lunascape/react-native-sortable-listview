@@ -11,6 +11,7 @@
     "url": "git+https://github.com/deanmcpherson/react-native-sortable-listview.git"
   },
   "dependencies": {
+    "create-react-class": "^15.6.2",
     "react-timer-mixin": "^0.13.3"
   },
   "keywords": [
