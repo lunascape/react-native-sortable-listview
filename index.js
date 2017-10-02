@@ -99,6 +99,7 @@ var SortRow = React.createClass({
 
 var SortableListView = React.createClass({
   mixins: [TimerMixin],
+  mounted: false,
   getInitialState:function() {
 
     let currentPanValue = {x: 0, y: 0};
@@ -202,9 +203,13 @@ var SortableListView = React.createClass({
     }
   },
   componentDidMount: function() {
+    this.mounted = true;
     setTimeout(()=>{
       this.scrollResponder = this.refs.list.getScrollResponder();
     }, 1);
+  },
+  componentWillUnmount: function() {
+    this.mounted = false;
   },
   measureWrapper: function() {
     if (this.refs.wrapper) {
@@ -220,7 +225,7 @@ var SortableListView = React.createClass({
   scrollValue: 0,
   scrollContainerHeight: HEIGHT * 1.2, //Gets calculated on scroll, but if you havent scrolled needs an initial value
   scrollAnimation: function() {
-    if (this.isMounted() /* deprecated and unnecessary: using TimerMixin */ && this.state.active) {
+    if (this.mounted && this.state.active) {
       if (this.moveY == undefined) return this.requestAnimationFrame(this.scrollAnimation);
 
       let SCROLL_OFFSET = this.wrapperLayout.pageY;
