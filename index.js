@@ -354,6 +354,10 @@ var SortableListView = createReactClass({
   renderActive: function() {
     if (!this.state.active) return;
     let index = this.state.active.rowData.index;
+    if (this.props.data[index] == null) {
+      this.state.active = false;
+      return;
+    }
     return this.renderRow(this.props.data[index], 's1', index, () => {}, {active: true, thumb: true});
   },
   componentWillMount: function() {
