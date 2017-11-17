@@ -374,6 +374,7 @@ var SortableListView = createReactClass({
   },
   render: function() {
     let dataSource = this.state.ds.cloneWithRows(this.props.data, this.props.order);
+    const removeClippedSubviews = ('removeClippedSubviews' in this.props) ? this.props.removeClippedSubviews : true;
 
     return <View ref="wrapper" style={{flex: 1}} onLayout={()=>{this.measureWrapper()}}>
       <ListView
@@ -393,6 +394,7 @@ var SortableListView = createReactClass({
         scrollEnabled={!this.state.active && (this.props.scrollEnabled !== false)}
         renderRow={this.renderRow}
         renderSeparator={this.props.renderSeparator}
+        removeClippedSubviews={removeClippedSubviews}
       />
       {this.renderActive()}
     </View>
