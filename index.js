@@ -187,7 +187,7 @@ var SortableListView = createReactClass({
 
         let MAX_HEIGHT = Math.max(0, this.scrollContainerHeight - this.listLayout.height + itemHeight);
         if (this.scrollValue > MAX_HEIGHT) {
-          this.scrollResponder.scrollTo({y: MAX_HEIGHT});
+          this.scrollTo({y: MAX_HEIGHT});
         }
 
         this.state.active = false;
@@ -262,7 +262,7 @@ var SortableListView = createReactClass({
       if (newScrollValue !== null) {
         this.scrollValue = newScrollValue;
          //this.scrollResponder.scrollWithoutAnimationTo(this.scrollValue, 0);
-         this.scrollResponder.scrollTo({y: this.scrollValue, x: 0, animated: false});
+         this.scrollTo({y: this.scrollValue, x: 0, animated: false});
       }
       this.checkTargetElement();
       this.requestAnimationFrame(this.scrollAnimation);
@@ -412,7 +412,11 @@ var SortableListView = createReactClass({
     </View>
   },
   scrollTo: function(...args) {
-    this.scrollResponder.scrollTo.apply(this.scrollResponder, args);
+    try {
+      this.scrollResponder.scrollTo.apply(this.scrollResponder, args); 
+    } catch (error) {
+      console.log('ScrollTo error: ' + error);
+    }
   }
 });
 
