@@ -208,16 +208,16 @@ var SortableListView = createReactClass({
   componentDidMount: function() {
     this.mounted = true;
     setTimeout(()=>{
-      this.scrollResponder = this.refs.list.getScrollResponder();
+      this.scrollResponder = this.list.getScrollResponder();
     }, 1);
   },
   componentWillUnmount: function() {
     this.mounted = false;
   },
   measureWrapper: function() {
-    if (this.refs.wrapper) {
+    if (this.wrapper) {
       setTimeout(() => {
-        this.refs.wrapper.measure((frameX, frameY, frameWidth, frameHeight, pageX, pageY) => {
+        this.wrapper.measure((frameX, frameY, frameWidth, frameHeight, pageX, pageY) => {
 
           let layout = {frameX, frameY, frameWidth, frameHeight, pageX, pageY};
           this.wrapperLayout = layout;
@@ -378,12 +378,12 @@ var SortableListView = createReactClass({
     let dataSource = this.state.ds.cloneWithRows(this.props.data, this.props.order);
     const removeClippedSubviews = ('removeClippedSubviews' in this.props) ? this.props.removeClippedSubviews : true;
 
-    return <View ref="wrapper" style={{flex: 1}} onLayout={()=>{this.measureWrapper()}}>
+    return <View ref={ref => this.wrapper = ref} style={{flex: 1}} onLayout={()=>{this.measureWrapper()}}>
       <ListView
         enableEmptySections={true}
         {...this.props}
         {...this.state.panResponder.panHandlers}
-        ref="list"
+        ref={ref => this.list = ref}
         dataSource={dataSource}
         onScroll={e => {
           this.scrollValue = e.nativeEvent.contentOffset.y;
