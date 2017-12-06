@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 
 let HEIGHT = Dimensions.get('window').height;
+let WIDTH = Dimensions.get('window').height;
 var Row = createReactClass({
   _data: {},
   shouldComponentUpdate: function(props) {
@@ -207,9 +208,6 @@ var SortableListView = createReactClass({
   },
   componentDidMount: function() {
     this.mounted = true;
-    setTimeout(()=>{
-      this.scrollResponder = this.list.getScrollResponder();
-    }, 1);
   },
   componentWillUnmount: function() {
     this.mounted = false;
@@ -217,11 +215,14 @@ var SortableListView = createReactClass({
   measureWrapper: function() {
     if (this.wrapper) {
       setTimeout(() => {
-        this.wrapper.measure((frameX, frameY, frameWidth, frameHeight, pageX, pageY) => {
-
-          let layout = {frameX, frameY, frameWidth, frameHeight, pageX, pageY};
-          this.wrapperLayout = layout;
-        });
+        try {
+          this.wrapper.measure((frameX, frameY, frameWidth, frameHeight, pageX, pageY) => {
+            let layout = {frameX, frameY, frameWidth, frameHeight, pageX, pageY};
+            this.wrapperLayout = layout;
+          });
+        } catch (e) {
+          this.wrapperLayout = {frameX: 0, frameY: 0, frameWidth: WIDTH, frameHeight: HEIGHT, pageX: 0, pageY: 0}
+        }
       }, 500);
     }
   },
@@ -378,12 +379,21 @@ var SortableListView = createReactClass({
     let dataSource = this.state.ds.cloneWithRows(this.props.data, this.props.order);
     const removeClippedSubviews = ('removeClippedSubviews' in this.props) ? this.props.removeClippedSubviews : true;
 
-    return <View ref={ref => this.wrapper = ref} style={{flex: 1}} onLayout={()=>{this.measureWrapper()}}>
+    return <View ref={ref => {
+        if(ref) {
+          this.wrapper = ref
+        }
+      }} style={{flex: 1}} onLayout={()=>{this.measureWrapper()}}>
       <ListView
         enableEmptySections={true}
         {...this.props}
         {...this.state.panResponder.panHandlers}
-        ref={ref => this.list = ref}
+        ref={ref => {
+          if (ref) {
+            this.list = ref;
+            this.scrollResponder = ref.getScrollResponder();
+          }
+        }}
         dataSource={dataSource}
         onScroll={e => {
           this.scrollValue = e.nativeEvent.contentOffset.y;
