@@ -183,8 +183,14 @@ var SortableListView = createReactClass({
             index: toIndex
           }
         };
-
-        this.props.onRowMoved && this.props.onRowMoved(args);
+        if (key && toIndex != NaN && fromIndex != NaN && this.state.active.rowData.index) {
+          this.props.onRowMoved && this.props.onRowMoved(args);
+        } else {
+          this.setState({
+            active: false,
+            hovering: false
+          });
+        }
         if (this.props._legacySupport) { //rely on parent data changes to set state changes
           //LayoutAnimation.easeInEaseOut()
           this.state.active = false;
