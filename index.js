@@ -25,7 +25,7 @@ var Row = createReactClass({
   handleLongPress: function(nativeEvent) {
     this.refs.view.measure((frameX, frameY, frameWidth, frameHeight, pageX, pageY) => {
       let layout = {frameX, frameY, frameWidth, frameHeight, pageX, pageY};
-      if (this.mouseMoved || (this.props.canDrag && !this.props.canDrag(frameWidth - nativeEvent.pageX))) {
+      if (this.mouseMoved || (this.props.canDrag && !this.props.canDrag(pageX + frameWidth - nativeEvent.pageX))) {
         return;
       }
       this.props.onRowActive({
@@ -50,7 +50,18 @@ var Row = createReactClass({
 
     let activeIndex = activeData ? activeData.rowData.index : -5;
     let shouldDisplayHovering = activeIndex !== this.props.rowData.index;
-    let Row = React.cloneElement(this.props.renderRow(this.props.rowData.data, this.props.rowData.section, this.props.rowData.index, null, this.props.active), {sortHandlers: {onLongPress: () => {}, onPressOut: this.props.list.cancel}, onLongPress: () => {}, onPressOut: this.props.list.cancel});
+    let Row = React.cloneElement(
+      this.props.renderRow(this.props.rowData.data, this.props.rowData.section, this.props.rowData.index, null, this.props.active),
+      {
+        sortHandlers: {
+          onLongPress: () => { },
+          onPressOut: this.props.list.cancel,
+          onTouchEnd: this.props.list.cancel,
+        },
+        onLongPress: () => { },
+        onPressOut: this.props.list.cancel,
+      },
+    );
     return <View style={[ this.props.active && !this.props.hovering ? {height: 0.01}:null, this.props.active && this.props.hovering ? {opacity: 0.0}: null,]}
       ref="view"
       onLayout={this.props.onRowLayout}
