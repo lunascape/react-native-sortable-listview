@@ -403,6 +403,7 @@ var SortableListView = createReactClass({
       }} style={{flex: 1}} onLayout={()=>{this.measureWrapper()}}>
       <ListView
         enableEmptySections={true}
+        initialListSize={20}
         {...this.props}
         {...this.state.panResponder.panHandlers}
         ref={ref => {
@@ -422,7 +423,6 @@ var SortableListView = createReactClass({
           }
         }}
         dataSource={dataSource}
-        initialListSize={20}
         onScroll={e => {
           this.scrollValue = e.nativeEvent.contentOffset.y;
           if (this.props.onScroll) this.props.onScroll(e);
@@ -441,7 +441,7 @@ var SortableListView = createReactClass({
   },
   scrollTo: function(...args) {
     try {
-      this.scrollResponder.scrollTo.apply(this.scrollResponder, args); 
+      this.scrollResponder.scrollTo.apply(this.scrollResponder, args);
     } catch (error) {
       console.log('ScrollTo error: ' + error);
     }
