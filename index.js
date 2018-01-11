@@ -411,7 +411,18 @@ var SortableListView = createReactClass({
             this.scrollResponder = ref.getScrollResponder();
           }
         }}
+        onScrollBeginDrag={e => {
+          if (this.props.onScrollBeginDrag) {
+            this.props.onScrollBeginDrag(e);
+          }
+        }}
+        onMomentumScrollEnd={e => {
+          if (this.props.onScrollEndDrag) {
+            this.props.onMomentumScrollEnd(e);
+          }
+        }}
         dataSource={dataSource}
+        initialListSize={20}
         onScroll={e => {
           this.scrollValue = e.nativeEvent.contentOffset.y;
           if (this.props.onScroll) this.props.onScroll(e);
